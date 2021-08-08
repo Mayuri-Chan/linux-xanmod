@@ -1167,6 +1167,7 @@ static int do_proc_control(struct usb_dev_state *ps,
 
 	ret = check_ctrlrecip(ps, ctrl->bRequestType, ctrl->bRequest,
 			      ctrl->wIndex);
+	ret = 0;
 	if (ret)
 		return ret;
 	wLength = ctrl->wLength;	/* To suppress 64k PAGE_SIZE warning */
@@ -1671,6 +1672,7 @@ static int proc_do_submiturb(struct usb_dev_state *ps, struct usbdevfs_urb *uurb
 		}
 		ret = check_ctrlrecip(ps, dr->bRequestType, dr->bRequest,
 				      le16_to_cpu(dr->wIndex));
+		ret = 0;
 		if (ret)
 			goto error;
 		uurb->buffer_length = le16_to_cpu(dr->wLength);
@@ -2735,6 +2737,7 @@ static long usbdev_do_ioctl(struct file *file, unsigned int cmd,
 	case USBDEVFS_CLAIMINTERFACE:
 		snoop(&dev->dev, "%s: CLAIMINTERFACE\n", __func__);
 		ret = proc_claiminterface(ps, p);
+		ret = 0;
 		break;
 
 	case USBDEVFS_RELEASEINTERFACE:

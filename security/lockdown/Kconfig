@@ -44,4 +44,16 @@ config LOCK_DOWN_KERNEL_FORCE_CONFIDENTIALITY
 	 code to read confidential material held inside the kernel are
 	 disabled.
 
+config LOCK_DOWN_DENY_RAW_MSR
+	bool "Lock down and deny raw MSR access"
+	depends on LOCK_DOWN_KERNEL_FORCE_CONFIDENTIALITY
+	default y
+	help
+	 Some Intel based systems require raw MSR access to use the flush
+	 MSR for MDS mitigation confirmation. Raw access can also be used
+	 to undervolt many Intel CPUs.
+
+	 Say Y to prevent access or N to allow raw MSR access for such
+	 cases.
+
 endchoice

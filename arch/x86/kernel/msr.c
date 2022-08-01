@@ -116,9 +116,11 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
 	int err = 0;
 	ssize_t bytes = 0;
 
+#if defined(LOCK_DOWN_DENY_RAW_MSR)
 	err = security_locked_down(LOCKDOWN_MSR);
 	if (err)
 		return err;
+#endif
 
 	err = filter_write(reg);
 	if (err)

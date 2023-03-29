@@ -1,0 +1,24 @@
+name: 'Build kernel'
+
+on:
+  push:
+    branches:
+      - build
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+    name: Build docker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: build docker image
+        run: docker build . -t xanmod
+      - name: build xanmod
+        run: |
+            mkdir share
+            docker run --name xanmod -v $(pwd)/share:/home/wulan17/share -t xanmod
+      - name: Upload
+        run: bash upload.sh
+        env:
+          TELEBOT: ${{ secrets.TELEBOT }}

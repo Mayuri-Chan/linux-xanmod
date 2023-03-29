@@ -48,9 +48,7 @@ if [ -z ${_config+x} ]; then
 fi
 
 # Compress modules with ZSTD (to save disk space)
-if [ -z ${_compress_modules+x} ]; then
-  _compress_modules=n
-fi
+_compress_modules=y
 
 # Compile ONLY used modules to VASTLY reduce the number of modules built
 # and the build time.
@@ -71,7 +69,7 @@ fi
 
 ### IMPORTANT: Do no edit below this line unless you know what you're doing
 
-pkgbase=linux-xanmod-anbox
+pkgbase=linux-xanmod-anbox-wulan17
 _major=6.2
 pkgver=${_major}.8
 _branch=6.x
@@ -91,8 +89,7 @@ fi
 options=('!strip')
 _srcname="linux-${pkgver}-xanmod${xanmod}"
 
-source=("https://cdn.kernel.org/pub/linux/kernel/v${_branch}/linux-${_major}.tar."{xz,sign}
-        "https://github.com/xanmod/linux/releases/download/${pkgver}-xanmod${xanmod}/patch-${pkgver}-xanmod${xanmod}.xz"
+source=("kernel-${_major}.zip::https://github.com/Mayuri-Chan/linux-xanmod/archive/refs/heads/${_major}.zip"
         choose-gcc-optimization.sh)
         #"patch-${pkgver}-xanmod${xanmod}.xz::https://sourceforge.net/projects/xanmod/files/releases/stable/${pkgver}-xanmod${xanmod}/patch-${pkgver}-xanmod${xanmod}.xz/download"
 validpgpkeys=(
@@ -108,9 +105,7 @@ for _patch in ${_patches[@]}; do
     source+=("${_patch}::https://raw.githubusercontent.com/archlinux/svntogit-packages/${_commit}/trunk/${_patch}")
 done
 
-sha256sums=('74862fa8ab40edae85bb3385c0b71fe103288bce518526d63197800b3cbdecb1'
-            'SKIP'
-            '94cb5c7b8e01fdd9e744ed5b030c6b37b35263b8b58b78994b140d03da92224d'
+sha256sums=('SKIP'
             '5c84bfe7c1971354cff3f6b3f52bf33e7bbeec22f85d5e7bfde383b54c679d30')
 
 export KBUILD_BUILD_HOST=${KBUILD_BUILD_HOST:-archlinux}
@@ -118,15 +113,16 @@ export KBUILD_BUILD_USER=${KBUILD_BUILD_USER:-makepkg}
 export KBUILD_BUILD_TIMESTAMP=${KBUILD_BUILD_TIMESTAMP:-$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})}
 
 prepare() {
+  mv linux-xanmod-${_major} linux-${_major}
   cd linux-${_major}
 
   # Apply Xanmod patch
-  patch -Np1 -i ../patch-${pkgver}-xanmod${xanmod}
+  # patch -Np1 -i ../patch-${pkgver}-xanmod${xanmod}
 
   msg2 "Setting version..."
   scripts/setlocalversion --save-scmversion
   echo "-$pkgrel" > localversion.10-pkgrel
-  echo "${pkgbase#linux-xanmod-anbox}" > localversion.20-pkgname
+  echo "${pkgbase#linux-xanmod-anbox-wulan17}" > localversion.20-pkgname
 
   # Archlinux patches
   local src
@@ -234,7 +230,7 @@ prepare() {
 
 build() {
   cd linux-${_major}
-  make ${_compiler_flags} all
+  make ${_compiler_flags} -j$(nproc) all
 }
 
 _package() {

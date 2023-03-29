@@ -1,4 +1,4 @@
-pkgbase = linux-xanmod-anbox
+pkgbase = linux-xanmod-anbox-wulan17
 	pkgdesc = Linux Xanmod with ashmem and binder enabled for Anbox - Current Stable (CURRENT)
 	pkgver = 6.2.8
 	pkgrel = 1
@@ -24,7 +24,7 @@ pkgbase = linux-xanmod-anbox
 	sha256sums = 94cb5c7b8e01fdd9e744ed5b030c6b37b35263b8b58b78994b140d03da92224d
 	sha256sums = 5c84bfe7c1971354cff3f6b3f52bf33e7bbeec22f85d5e7bfde383b54c679d30
 
-pkgname = linux-xanmod-anbox
+pkgname = linux-xanmod-anbox-wulan17
 	pkgdesc = The Linux kernel and modules with Xanmod patches and ashmem and binder enabled
 	depends = coreutils
 	depends = kmod
@@ -36,6 +36,6 @@ pkgname = linux-xanmod-anbox
 	provides = KSMBD-MODULE
 	provides = NTFS3-MODULE
 
-pkgname = linux-xanmod-anbox-headers
+pkgname = linux-xanmod-anbox-wulan17-headers
 	pkgdesc = Headers and scripts for building modules for the Linux Xanmod with ashmem and binder enabled for Anbox - Current Stable (CURRENT) kernel
 	depends = pahole

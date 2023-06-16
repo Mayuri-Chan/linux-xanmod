@@ -71,7 +71,7 @@ fi
 
 pkgbase=linux-xanmod-anbox-wulan17
 _major=6.3
-pkgver=${_major}.5
+pkgver=${_major}.8
 _branch=6.x
 xanmod=1
 pkgrel=${xanmod}

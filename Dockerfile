@@ -2,7 +2,7 @@ FROM archlinux:base-devel
 
 RUN pacman -Syu --noconfirm
 
-RUN pacman -S --noconfirm bc cpio kmod libelf perl tar xz pahole clang sudo git
+RUN pacman -S --noconfirm bc cpio kmod libelf perl tar xz pahole clang sudo git wget unzip
 
 RUN useradd -g wheel --create-home wulan17
 
@@ -13,5 +13,9 @@ RUN mkdir /home/wulan17/share
 RUN chown -R wulan17 /home/wulan17
 
 COPY entrypoint.sh /entrypoint.sh
+
+ENV major_version $major_version
+
+ENV pkg_version $pkg_version
 
 ENTRYPOINT ["/entrypoint.sh"]

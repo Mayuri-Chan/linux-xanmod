@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - build
+  schedule:
+    - cron: '0 12 * * *'
 
 jobs:
   build-docker:
@@ -12,13 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: build docker image
-        run: docker build . -t xanmod
-      - name: build xanmod
-        run: |
-            mkdir share
-            docker run --name xanmod -v $(pwd)/share:/home/wulan17/share -t xanmod
-      - name: Upload
-        run: bash upload.sh
+      - name: check build and upload
+        run: bash build.sh
         env:
+          api_key: ${{ secrets.API_KEY }}
           TELEBOT: ${{ secrets.TELEBOT }}

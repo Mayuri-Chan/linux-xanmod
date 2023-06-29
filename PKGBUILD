@@ -70,9 +70,8 @@ fi
 ### IMPORTANT: Do no edit below this line unless you know what you're doing
 
 pkgbase=linux-xanmod-anbox-wulan17
-_major=6.4
-pkgver=${_major}.0
-_branch=6.x
+_major=$major_version
+pkgver=$pkg_version
 xanmod=1
 pkgrel=${xanmod}
 pkgdesc='Linux Xanmod with ashmem and binder enabled for Anbox - Current Stable (CURRENT)'
@@ -89,8 +88,7 @@ fi
 options=('!strip')
 _srcname="linux-${pkgver}-xanmod${xanmod}"
 
-source=("kernel-${_major}.zip::https://github.com/Mayuri-Chan/linux-xanmod/archive/refs/heads/${_major}.zip"
-        choose-gcc-optimization.sh)
+source=(choose-gcc-optimization.sh)
         #"patch-${pkgver}-xanmod${xanmod}.xz::https://sourceforge.net/projects/xanmod/files/releases/stable/${pkgver}-xanmod${xanmod}/patch-${pkgver}-xanmod${xanmod}.xz/download"
 validpgpkeys=(
     'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linux Torvalds
@@ -105,15 +103,13 @@ for _patch in ${_patches[@]}; do
     source+=("${_patch}::https://raw.githubusercontent.com/archlinux/svntogit-packages/${_commit}/trunk/${_patch}")
 done
 
-sha256sums=('SKIP'
-            '5c84bfe7c1971354cff3f6b3f52bf33e7bbeec22f85d5e7bfde383b54c679d30')
+sha256sums=('5c84bfe7c1971354cff3f6b3f52bf33e7bbeec22f85d5e7bfde383b54c679d30')
 
 export KBUILD_BUILD_HOST=${KBUILD_BUILD_HOST:-archlinux}
 export KBUILD_BUILD_USER=${KBUILD_BUILD_USER:-makepkg}
 export KBUILD_BUILD_TIMESTAMP=${KBUILD_BUILD_TIMESTAMP:-$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})}
 
 prepare() {
-  mv linux-xanmod-${_major} linux-${_major}
   cd linux-${_major}
 
   # Apply Xanmod patch

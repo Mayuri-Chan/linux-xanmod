@@ -9,7 +9,7 @@ _compiler_flags="CC=clang HOSTCC=clang LLVM=1 LLVM_IAS=1"
 
 ### IMPORTANT: Do no edit below this line unless you know what you're doing
 
-pkgbase=linux-xanmod-wulan17-wsl2-headers
+pkgbase=linux-xanmod-wulan17-wsl2
 _major=$major_version
 pkgver=$pkg_version
 xanmod=1

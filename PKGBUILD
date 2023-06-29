@@ -101,6 +101,34 @@ build() {
 }
 
 _package() {
+  pkgdesc="The Linux kernel and modules with Xanmod patches for WSL2"
+  depends=(coreutils kmod initramfs)
+  optdepends=('crda: to set the correct wireless channels of your country'
+              'linux-firmware: firmware images needed for some devices')
+  provides=(WIREGUARD-MODULE
+            KSMBD-MODULE
+            NTFS3-MODULE)
+
+  cd linux-${_major}
+  local kernver="$(<version)"
+  local modulesdir="$pkgdir/usr/lib/modules/$kernver"
+
+  msg2 "Installing boot image..."
+  # systemd expects to find the kernel here to allow hibernation
+  # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
+  install -Dm644 "$(make -s image_name)" "$modulesdir/vmlinuz"
+
+  # Used by mkinitcpio to name the kernel
+  echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
+
+  msg2 "Installing modules..."
+  make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 modules_install
+
+  # remove build and source links
+  rm "$modulesdir"/{source,build}
+}
+
+_package-headers() {
   pkgdesc="Headers and scripts for building modules for the $pkgdesc kernel"
   depends=(pahole)
 
@@ -182,7 +210,7 @@ _package() {
   ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
 }
 
-pkgname=("${pkgbase}")
+pkgname=("${pkgbase}" "${pkgbase}-headers")
 for _p in "${pkgname[@]}"; do
   eval "package_$_p() {
     $(declare -f "_package${_p#$pkgbase}")

@@ -2,7 +2,7 @@ FROM archlinux:base-devel
 
 RUN pacman -Syu --noconfirm
 
-RUN pacman -S --noconfirm bc cpio kmod libelf perl tar xz pahole clang sudo git wget unzip
+RUN pacman -S --noconfirm bc cpio kmod libelf perl tar xz pahole clang sudo git wget unzip clang llvm lld python
 
 RUN useradd -g wheel --create-home wulan17
 

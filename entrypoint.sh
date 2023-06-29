@@ -4,6 +4,7 @@ echo "Pkg: $pkg_version"
 sudo -i -u wulan17 bash << EOF
 export major_version="$major_version"
 export pkg_version="$pkg_version"
+export _compiler="clang"
 cd ~
 git config --global user.name wulan17
 git config --global user.email "wulan17@wulan17.my.id"

@@ -2,95 +2,27 @@
 # Contributor: Torge Matthies <openglfreak at googlemail dot com>
 # Contributor: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
-##
-## The following variables can be customized at build time. Use env or export to change at your wish
-##
-##   Example: env _microarchitecture=98 use_numa=n use_tracers=n makepkg -sc
-##
-## Look inside 'choose-gcc-optimization.sh' to choose your microarchitecture
-## Valid numbers between: 0 to 99
-## Default is: 0 => generic
-## Good option if your package is for one machine: 98 (Intel native) or 99 (AMD native)
-if [ -z ${_microarchitecture+x} ]; then
-  _microarchitecture=0
-fi
-
-## Disable NUMA since most users do not have multiple processors. Breaks CUDA/NvEnc.
-## Archlinux and Xanmod enable it by default.
-## Set variable "use_numa" to: n to disable (possibly increase performance)
-##                             y to enable  (stock default)
-if [ -z ${use_numa+x} ]; then
-  use_numa=y
-fi
-
-## Since upstream disabled CONFIG_STACK_TRACER (limits debugging and analyzing of the kernel)
-## you can enable them setting this option. Caution, because they have an impact in performance.
-## Stock Archlinux has this enabled. 
-## Set variable "use_tracers" to: n to disable (possibly increase performance, XanMod default)
-##                                y to enable  (Archlinux default)
-if [ -z ${use_tracers+x} ]; then
-  use_tracers=n
-fi
-
 # Unique compiler supported upstream is GCC
 ## Choose between GCC and CLANG config (default is GCC)
 ## Use the environment variable "_compiler=clang"
-if [ "${_compiler}" = "clang" ]; then
-  _compiler_flags="CC=clang HOSTCC=clang LLVM=1 LLVM_IAS=1"
-fi
-
-# Choose between the 4 main configs for stable branch. Default x86-64-v1 which use CONFIG_GENERIC_CPU2:
-# Possible values: config_x86-64-v1 (default) / config_x86-64-v2 / config_x86-64-v3 / config_x86-64-v4
-# This will be overwritten by selecting any option in microarchitecture script
-# Source files: https://github.com/xanmod/linux/tree/5.17/CONFIGS/xanmod/gcc
-if [ -z ${_config+x} ]; then
-  _config=config_x86-64-v1
-fi
-
-# Compress modules with ZSTD (to save disk space)
-_compress_modules=y
-
-# Compile ONLY used modules to VASTLY reduce the number of modules built
-# and the build time.
-#
-# To keep track of which modules are needed for your specific system/hardware,
-# give module_db script a try: https://aur.archlinux.org/packages/modprobed-db
-# This PKGBUILD read the database kept if it exists
-#
-# More at this wiki page ---> https://wiki.archlinux.org/index.php/Modprobed-db
-if [ -z ${_localmodcfg} ]; then
-  _localmodcfg=n
-fi
-
-# Tweak kernel options prior to a build via nconfig
-if [ -z ${_makenconfig} ]; then
-  _makenconfig=n
-fi
+_compiler_flags="CC=clang HOSTCC=clang LLVM=1 LLVM_IAS=1"
 
 ### IMPORTANT: Do no edit below this line unless you know what you're doing
 
-pkgbase=linux-xanmod-anbox-wulan17
-_major=6.4
-pkgver=${_major}.0
-_branch=6.x
+pkgbase=linux-xanmod-wulan17-wsl2-headers
+_major=$major_version
+pkgver=$pkg_version
 xanmod=1
 pkgrel=${xanmod}
-pkgdesc='Linux Xanmod with ashmem and binder enabled for Anbox - Current Stable (CURRENT)'
+pkgdesc='Linux Xanmod for WSL2 - Current Stable (CURRENT)'
 url="http://www.xanmod.org/"
 arch=(x86_64)
 
 license=(GPL2)
-makedepends=(
-  bc cpio kmod libelf perl tar xz
-)
-if [ "${_compiler}" = "clang" ]; then
-  makedepends+=(clang llvm lld python)
-fi
 options=('!strip')
 _srcname="linux-${pkgver}-xanmod${xanmod}"
 
-source=("kernel-${_major}.zip::https://github.com/Mayuri-Chan/linux-xanmod/archive/refs/heads/${_major}.zip"
-        choose-gcc-optimization.sh)
+source=(choose-gcc-optimization.sh)
         #"patch-${pkgver}-xanmod${xanmod}.xz::https://sourceforge.net/projects/xanmod/files/releases/stable/${pkgver}-xanmod${xanmod}/patch-${pkgver}-xanmod${xanmod}.xz/download"
 validpgpkeys=(
     'ABAF11C65A2970B130ABE3C479BE3E4300411886' # Linux Torvalds
@@ -105,15 +37,13 @@ for _patch in ${_patches[@]}; do
     source+=("${_patch}::https://raw.githubusercontent.com/archlinux/svntogit-packages/${_commit}/trunk/${_patch}")
 done
 
-sha256sums=('SKIP'
-            '5c84bfe7c1971354cff3f6b3f52bf33e7bbeec22f85d5e7bfde383b54c679d30')
+sha256sums=('5c84bfe7c1971354cff3f6b3f52bf33e7bbeec22f85d5e7bfde383b54c679d30')
 
 export KBUILD_BUILD_HOST=${KBUILD_BUILD_HOST:-archlinux}
 export KBUILD_BUILD_USER=${KBUILD_BUILD_USER:-makepkg}
 export KBUILD_BUILD_TIMESTAMP=${KBUILD_BUILD_TIMESTAMP:-$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})}
 
 prepare() {
-  mv linux-xanmod-${_major} linux-${_major}
   cd linux-${_major}
 
   # Apply Xanmod patch
@@ -121,7 +51,7 @@ prepare() {
 
   msg2 "Setting version..."
   echo "-$pkgrel" > localversion.10-pkgrel
-  echo "${pkgbase#linux-xanmod-anbox-wulan17}" > localversion.20-pkgname
+  echo "" > localversion.20-pkgname
 
   # Archlinux patches
   local src
@@ -134,20 +64,10 @@ prepare() {
   done
 
   # Applying configuration
-  cp -vf CONFIGS/xanmod/gcc/${_config} .config
+  cp -vf CONFIGS/xanmod/gcc/config_x86-64-v1 .config
   # enable LTO_CLANG_THIN
-  if [ "${_compiler}" = "clang" ]; then
-    scripts/config --disable LTO_CLANG_FULL
-
-  # Anbox compatibility
-  msg2 "Enabling ashmem and binder modules"
-  scripts/config --enable CONFIG_ASHMEM
-  scripts/config --enable CONFIG_ANDROID
-  scripts/config --enable CONFIG_ANDROID_BINDER_IPC
-  scripts/config --enable CONFIG_ANDROID_BINDERFS
-  scripts/config --set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder"
-    scripts/config --enable LTO_CLANG_THIN
-  fi
+  scripts/config --disable LTO_CLANG_FULL
+  scripts/config --enable LTO_CLANG_THIN
 
   # CONFIG_STACK_VALIDATION gives better stack traces. Also is enabled in all official kernel packages by Archlinux team
   scripts/config --enable CONFIG_STACK_VALIDATION
@@ -166,62 +86,10 @@ prepare() {
     fi
   fi
 
-  if [ "$use_numa" = "n" ]; then
-    msg2 "Disabling NUMA..."
-    scripts/config --disable CONFIG_NUMA
-  fi
-
-  # Compress modules by default (following Arch's kernel)
-  if [ "$_compress_modules" = "y" ]; then
-    scripts/config --enable CONFIG_MODULE_COMPRESS_ZSTD
-  fi
-
-  # Let's user choose microarchitecture optimization in GCC
-  # Use default microarchitecture only if we have not choosen another microarchitecture
-  if [ "$_microarchitecture" -ne "0" ]; then
-    ../choose-gcc-optimization.sh $_microarchitecture
-  fi
-
-  # This is intended for the people that want to build this package with their own config
-  # Put the file "myconfig" at the package folder (this will take preference) or "${XDG_CONFIG_HOME}/linux-xanmod-anbox/myconfig"
-  # If we detect partial file with scripts/config commands, we execute as a script
-  # If not, it's a full config, will be replaced
-  for _myconfig in "${SRCDEST}/myconfig" "${HOME}/.config/linux-xanmod-anbox/myconfig" "${XDG_CONFIG_HOME}/linux-xanmod-anbox/myconfig" ; do
-    if [ -f "${_myconfig}" ] && [ "$(wc -l <"${_myconfig}")" -gt "0" ]; then
-      if grep -q 'scripts/config' "${_myconfig}"; then
-        # myconfig is a partial file. Executing as a script
-        msg2 "Applying myconfig..."
-        bash -x "${_myconfig}"
-      else
-        # myconfig is a full config file. Replacing default .config
-        msg2 "Using user CUSTOM config..."
-        cp -f "${_myconfig}" .config
-      fi
-      echo
-      break
-    fi
-  done
-
-  ### Optionally load needed modules for the make localmodconfig
-  # See https://aur.archlinux.org/packages/modprobed-db
-  if [ "$_localmodcfg" = "y" ]; then
-    if [ -f $HOME/.config/modprobed.db ]; then
-      msg2 "Running Steven Rostedt's make localmodconfig now"
-      make ${_compiler_flags} LSMOD=$HOME/.config/modprobed.db localmodconfig
-    else
-      msg2 "No modprobed.db data found"
-      exit 1
-    fi
-  fi
-
   make ${_compiler_flags} olddefconfig
 
   make -s kernelrelease > version
   msg2 "Prepared %s version %s" "$pkgbase" "$(<version)"
-
-  if [ "$_makenconfig" = "y" ]; then
-    make ${_compiler_flags} nconfig
-  fi
 
   # save configuration for later reuse
   cat .config > "${SRCDEST}/config.last"
@@ -233,35 +101,6 @@ build() {
 }
 
 _package() {
-  pkgdesc="The Linux kernel and modules with Xanmod patches and ashmem and binder enabled"
-  depends=(coreutils kmod initramfs)
-  optdepends=('crda: to set the correct wireless channels of your country'
-              'linux-firmware: firmware images needed for some devices')
-  provides=(VIRTUALBOX-GUEST-MODULES
-            WIREGUARD-MODULE
-            KSMBD-MODULE
-            NTFS3-MODULE)
-
-  cd linux-${_major}
-  local kernver="$(<version)"
-  local modulesdir="$pkgdir/usr/lib/modules/$kernver"
-
-  msg2 "Installing boot image..."
-  # systemd expects to find the kernel here to allow hibernation
-  # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
-  install -Dm644 "$(make -s image_name)" "$modulesdir/vmlinuz"
-
-  # Used by mkinitcpio to name the kernel
-  echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
-
-  msg2 "Installing modules..."
-  make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 modules_install
-
-  # remove build and source links
-  rm "$modulesdir"/{source,build}
-}
-
-_package-headers() {
   pkgdesc="Headers and scripts for building modules for the $pkgdesc kernel"
   depends=(pahole)
 
@@ -343,7 +182,7 @@ _package-headers() {
   ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
 }
 
-pkgname=("${pkgbase}" "${pkgbase}-headers")
+pkgname=("${pkgbase}")
 for _p in "${pkgname[@]}"; do
   eval "package_$_p() {
     $(declare -f "_package${_p#$pkgbase}")

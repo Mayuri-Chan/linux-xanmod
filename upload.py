@@ -17,7 +17,7 @@ client = Client(
 	sleep_threshold=180
 )
 
-all_files = glob.glob(f'{sys.argv[1]}/share/*.zst')
+all_files = glob.glob(f'{sys.argv[1]}/share/*')
 
 async def upload():
 	client.loop = asyncio.get_event_loop()
@@ -28,19 +28,15 @@ async def upload():
 	version = None
 	caption = None
 	now = datetime.now().strftime('%d/%m/%Y')
-	r = r"(wulan17-)([0-9]{1,}\.[0-9]\.[0-9]{1,})(-[0-9]{1,}-x86_64)"
 	for file in all_files:
-		search = re.search(r, file)
-		if search:
-			version = search.group(2)
 		if i == count:
 			caption = f'''
-🆕 linux-xanmod-anbox v{version}
+🆕 linux-xanmod for WSL2 v{os.environ.get("pkg_version", None)}
 👤 By wulan17
-🖥 Archlinux-based Distro
+🖥 Archlinux-based WSL2
 ⏱ Build Date {now}
 
-#archlinux #kernel #xanmod
+#archlinux #kernel #xanmod #WSL #WSL2
 			'''
 		media.append(InputMediaDocument(media=file, caption=caption))
 		i = i+1

@@ -19,8 +19,9 @@ rm *.patch
 rm CONFIGS/xanmod/gcc/config_x86-64-v1
 wget -O CONFIGS/xanmod/gcc/config_x86-64-v1 https://raw.githubusercontent.com/Locietta/xanmod-kernel-WSL2/main/wsl2_defconfig
 sed -i 's/locietta/wulan17/g' CONFIGS/xanmod/gcc/config_x86-64-v1
-cd ../..
-MAKEFLAGS="-j$(nproc)" makepkg -s --noconfirm
+#cd ../..
+#MAKEFLAGS="-j$(nproc)" makepkg -s --noconfirm
+make CC=clang HOSTCC=clang LLVM=1 LLVM_IAS=1 -j$(nproc)
 EOF
 
 cd /home/wulan17

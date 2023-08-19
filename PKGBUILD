@@ -35,9 +35,7 @@ fi
 # Unique compiler supported upstream is GCC
 ## Choose between GCC and CLANG config (default is GCC)
 ## Use the environment variable "_compiler=clang"
-if [ "${_compiler}" = "clang" ]; then
-  _compiler_flags="CC=clang HOSTCC=clang LLVM=1 LLVM_IAS=1"
-fi
+_compiler_flags="CC=clang HOSTCC=clang LLVM=1 LLVM_IAS=1"
 
 # Choose between the 4 main configs for stable branch. Default x86-64-v1 which use CONFIG_GENERIC_CPU2:
 # Possible values: config_x86-64-v1 (default) / config_x86-64-v2 / config_x86-64-v3 / config_x86-64-v4
@@ -142,7 +140,9 @@ prepare() {
   scripts/config --enable CONFIG_ANDROID_BINDER_IPC
   scripts/config --enable CONFIG_ANDROID_BINDERFS
   scripts/config --set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder"
-    scripts/config --enable LTO_CLANG_THIN
+  scripts/config --enable LTO_CLANG_THIN
+  scripts/config --disable CONFIG_LTO_NONE
+  scripts/config --disable CONFIG_CPU_SRSO
   fi
 
   # CONFIG_STACK_VALIDATION gives better stack traces. Also is enabled in all official kernel packages by Archlinux team

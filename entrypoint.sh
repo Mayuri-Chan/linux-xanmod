@@ -14,6 +14,7 @@ git clone https://github.com/xanmod/linux -b "$major_version" --single-branch sr
 cd src/linux-"$major_version"
 git fetch https://github.com/Mayuri-Chan/linux-xanmod 6.4
 git cherry-pick c8ed02a622e1fdaea0ba2f558c2868deda84cab2 80db63aa1ae5e564554aa9f91ce86970b8bfcd8b ba922dacf72ff41f8f621f85dd99174f6cfdb783
+sed -i 's/-fexcess-precision=fast//g' arch/x86/Makefile
 cd ../..
 MAKEFLAGS="-j$(nproc)" makepkg -s --noconfirm
 EOF

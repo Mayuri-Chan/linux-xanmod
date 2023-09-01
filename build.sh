@@ -1,5 +1,5 @@
 #!/bin/bash
-export major_version=6.4
+export major_version=6.5
 wget -O temp_makefile https://raw.githubusercontent.com/xanmod/linux/"$major_version"/Makefile
 eval $(grep -o "^\(VERSION\|PATCHLEVEL\|SUBLEVEL\) = [0-9a-zA-Z_-]\+" temp_makefile | tr -d \ )
 export pkg_version="$VERSION.$PATCHLEVEL.$SUBLEVEL"

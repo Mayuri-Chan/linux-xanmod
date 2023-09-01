@@ -130,8 +130,7 @@ prepare() {
   # Applying configuration
   cp -vf CONFIGS/xanmod/gcc/${_config} .config
   # enable LTO_CLANG_THIN
-  if [ "${_compiler}" = "clang" ]; then
-    scripts/config --disable LTO_CLANG_FULL
+  scripts/config --disable LTO_CLANG_FULL
 
   # Anbox compatibility
   msg2 "Enabling ashmem and binder modules"
@@ -143,7 +142,6 @@ prepare() {
   scripts/config --enable LTO_CLANG_THIN
   scripts/config --disable CONFIG_LTO_NONE
   scripts/config --disable CONFIG_CPU_SRSO
-  fi
 
   # CONFIG_STACK_VALIDATION gives better stack traces. Also is enabled in all official kernel packages by Archlinux team
   scripts/config --enable CONFIG_STACK_VALIDATION
